@@ -1,0 +1,11 @@
+@URL=http://localhost:8080/pessoa
+
+###Criar uma Pessoa
+POST {{URL}}
+Content-Type: application/json
+
+{
+    "nome": "Cleberson",
+    "sobrenome": "Santos",
+    "email": "clebersonsantos@gmail.com"
+}
