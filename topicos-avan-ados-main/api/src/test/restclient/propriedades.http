@@ -1,0 +1,11 @@
+@URL=http://localhost:8080/propriedades
+
+###Criar uma Pessoa
+POST {{URL}}
+Content-Type: application/json
+
+{
+    "nome": "funrural2",
+    "tamanho_ha": 589489385934.2,
+    "responsavel": "clebersonsantos@gmail.com"
+}

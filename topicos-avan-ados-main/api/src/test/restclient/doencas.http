@@ -1,0 +1,15 @@
+@URL=http://localhost:8080/doencas
+
+###Criar uma Pessoa
+POST {{URL}}
+Content-Type: application/json
+
+{
+    "nome": "preguiça",
+    "sintomas": "rafaela",
+    "culturas_afetadas":
+    [
+        4, 3, 2
+    ],
+    "tratamentos": "bla"
+}

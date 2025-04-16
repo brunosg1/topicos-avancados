@@ -1,0 +1,11 @@
+@URL=http://localhost:8080/culturas
+
+###Criar uma Pessoa
+POST {{URL}}
+Content-Type: application/json
+
+{
+    "nome": "rafazinho123",
+    "tempo_cultivo_dias": 5,
+    "epoca_plantio": "março"
+}
