@@ -2,9 +2,6 @@ package br.edu.utfpr.api.model;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -25,7 +22,7 @@ public class Propriedade extends BaseEntity{
     public String nome;
 
     @Column(name= "tamanho_ha", nullable = false, length = 100)
-    public float tamanho_ha;
+    public float tamanhoHa;
 
     @Column(name= "responsavel", nullable = false, length = 100)
     public String responsavel;

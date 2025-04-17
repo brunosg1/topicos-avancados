@@ -22,8 +22,8 @@ public class Cultura extends BaseEntity {
     private String nome;
 
     @Column(name= "tempo_cultivo_dias", nullable = false, length = 100)
-    private int tempo_cultivo_dias;
+    private int tempoCultivoDias;
 
     @Column(name= "epoca_plantio", nullable = false, length = 100)
-    private String epoca_plantio;
+    private String epocaPlantio;
 }
