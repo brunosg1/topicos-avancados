@@ -1,0 +1,15 @@
+@URL=http://localhost:8080/pragas
+
+###Criar uma Pessoa
+POST {{URL}}
+Content-Type: application/json
+
+{
+    "nome": "Cleberson",
+    "nome_cientifico": "cleberianae",
+    "culturas_afetadas": 
+    [
+        4, 5, 3
+    ],
+    "descricao" : "claudios cleberson cleberianae, não assiste ao canal"
+}

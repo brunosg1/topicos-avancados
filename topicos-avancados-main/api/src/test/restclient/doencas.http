@@ -1,0 +1,35 @@
+@URL=http://localhost:8080/doencas
+
+###Criar uma doenca
+POST {{URL}}
+Content-Type: application/json
+
+{
+    "nome": "preguiça",
+    "sintomas": "rafaela",
+    "culturasAfetadas":
+    [
+        {
+            "id": 1
+        }
+    ],
+    "tratamentos": "bla"
+}
+
+###Deletar uma doenca
+DELETE {{URL}}?id=1
+Content-Type: application/json
+
+###Editar uma doenca
+PUT {{URL}}
+Content-Type: application/json
+{
+    "id": 2,
+    "nome": "clebinho",
+    "tempo_cultivo_dias": 5,
+    "epoca_plantio": "março"
+}
+
+###Receber uma doenca
+GET {{URL}}?nome=rafazinho123
+Content-Type: application/json

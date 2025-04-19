@@ -1,0 +1,31 @@
+@URL=http://localhost:8080/culturas
+
+###Criar uma cultura
+POST {{URL}}
+Content-Type: application/json
+
+{
+    "nome": "rafazinho123",
+    "tempo_cultivo_dias": 5,
+    "epoca_plantio": "março"
+}
+
+
+###Deletar uma cultura
+DELETE {{URL}}?id=1
+Content-Type: application/json
+
+###Editar uma cultura
+PUT {{URL}}
+Content-Type: application/json
+
+{
+    "id": 2,
+    "nome": "clebinho",
+    "tempo_cultivo_dias": 5,
+    "epoca_plantio": "março"
+}
+
+###Receber uma cultura
+GET {{URL}}?nome=rafazinho123
+Content-Type: application/json
