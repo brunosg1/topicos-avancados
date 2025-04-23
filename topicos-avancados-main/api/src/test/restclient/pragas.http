@@ -1,15 +1,33 @@
 @URL=http://localhost:8080/pragas
 
-###Criar uma Pessoa
+###Criar uma praga
 POST {{URL}}
 Content-Type: application/json
 
 {
-    "nome": "Cleberson",
-    "nome_cientifico": "cleberianae",
-    "culturas_afetadas": 
-    [
-        4, 5, 3
-    ],
-    "descricao" : "claudios cleberson cleberianae, não assiste ao canal"
+    "nome": "preguiça",
+    "nomeCientifico": "rafaela",
+    "culturasAfetadas":[1],
+    "descricao": "bla"
 }
+
+###Deletar uma praga
+DELETE {{URL}}?id=1
+Content-Type: application/json
+
+###Editar uma praga
+PUT {{URL}}
+Content-Type: application/json
+
+{
+    "id": 1,
+    "nome": "clebinho_doencas",
+    "nomeCientifico": "angelica",
+    "culturasAfetadas":[2],
+    "descricao": "bla"
+}
+
+###Receber uma praga
+
+GET {{URL}}
+Content-Type: application/json

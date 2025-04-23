@@ -6,16 +6,18 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 import br.edu.utfpr.api.dto.DoencaDTO;
+import br.edu.utfpr.api.dto.DoencaResponseDTO;
 import br.edu.utfpr.api.model.Cultura;
 import br.edu.utfpr.api.model.Doenca;
 import br.edu.utfpr.api.repository.CulturaRepository;
 import br.edu.utfpr.api.repository.DoencaRepository;
 
-import java.util.ArrayList;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -29,84 +31,91 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 @RestController
 @RequestMapping(value="/doencas", produces = "application/json")
-
 public class DoencaController {
+
     @Autowired
     private DoencaRepository doencaRepository;
 
     @Autowired
     private CulturaRepository culturaRepository;
 
-    @GetMapping({"", "/"})
-    public List<Doenca> get(@RequestParam(required = false) String nome) {
-        var doencas = doencaRepository.findAll();
+    @GetMapping
+    public ResponseEntity<List<DoencaResponseDTO>> get(@RequestParam(required = false) String nome) {
+        List<Doenca> doencas;
 
         if (nome == null || nome.isEmpty()) {
-            // Retorna todas as culturas se nome não for informado, pode retornar uma lista vazia
-            return doencas;
+            doencas = doencaRepository.findAllWithCulturas();
         } else {
-            List<Doenca> auxList = new ArrayList<>();
-            for (Doenca doenca : doencas) {
-                if (doenca.getNome().equalsIgnoreCase(nome)) {
-                    auxList.add(doenca);
-                }
-            }
-            if (auxList.isEmpty()){
-                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Cultura não encontrada");          
-            }
-            return auxList; //retorna lista com respostas
+            doencas = doencaRepository.findByNomeIgnoreCaseWithCulturas(nome);
         }
+
+        if (doencas.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Doença não encontrada");
+        }
+
+        List<DoencaResponseDTO> dtos = doencas.stream()
+                                              .map(DoencaResponseDTO::new)
+                                              .collect(Collectors.toList());
+
+        return ResponseEntity.ok(dtos);
     }
+
     @PutMapping({"", "/"})
-    public Doenca put(@RequestBody Cultura doenca) {
-        Optional<Doenca> doencaExistente = doencaRepository.findById(doenca.getId());
+    public ResponseEntity<Doenca> put(@RequestBody DoencaDTO doencaDTO) {
+        Optional<Doenca> doencaExistente = doencaRepository.findById(doencaDTO.id);
 
-        if (doencaExistente.isPresent()) {
-            Doenca atualizada = doencaExistente.get();
-            atualizada.setNome(doenca.getNome());
-
-            return doencaRepository.save(atualizada); 
-        } else {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Doenca não encontrada");
+        if (doencaExistente.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Doença não encontrada");
         }
+
+        List<Cultura> culturas = doencaDTO.culturasAfetadas.stream()
+            .map(id -> culturaRepository.findById(id)
+                        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Cultura com ID " + id + " não encontrada")))
+            .collect(Collectors.toList());
+
+        Doenca doenca = doencaExistente.get();
+        doenca.setNome(doencaDTO.nome);
+        doenca.setSintomas(doencaDTO.sintomas);
+        doenca.setTratamentos(doencaDTO.tratamentos);
+        doenca.setCulturasAfetadas(culturas);
+        doenca.setUpdateDate(LocalDateTime.now());
+
+        Doenca atualizada = doencaRepository.save(doenca);
+        return ResponseEntity.ok(atualizada);
     }
 
     @PostMapping({"", "/"})
-    public Doenca post(@RequestBody DoencaDTO p) {
-        var culturas = new ArrayList<Cultura>();
+    public ResponseEntity<Doenca> post(@RequestBody DoencaDTO p) {
+        List<Cultura> culturas = p.culturasAfetadas.stream()
+            .map(id -> culturaRepository.findById(id)
+                        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Cultura com ID " + id + " não encontrada")))
+            .collect(Collectors.toList());
 
-        for (Long id : p.culturasAfetadas) {
-            Cultura cultura = culturaRepository.findById(id).get();
-            culturas.add(cultura);
-        }
-
-        if(culturas.isEmpty()){
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Culturas não encontradas");
-        }
-
-        var doenca = new Doenca();
+        Doenca doenca = new Doenca();
         doenca.setNome(p.nome);
         doenca.setSintomas(p.sintomas);
-        doenca.setCulturasAfetadas(culturas);
         doenca.setTratamentos(p.tratamentos);
+        doenca.setCulturasAfetadas(culturas);
+        doenca.setCreationDate(LocalDateTime.now());
 
-        return doencaRepository.save(doenca);
+        Doenca salva = doencaRepository.save(doenca);
+        return ResponseEntity.status(HttpStatus.CREATED).body(salva);
     }
 
     @DeleteMapping({"", "/"})
     public ResponseEntity<Map<String, Object>> delete(@RequestParam long id) {
         Optional<Doenca> doenca = doencaRepository.findById(id);
 
-        if (doenca.isPresent()) {
-            doencaRepository.delete(doenca.get());
-
-            Map<String, Object> resposta = new HashMap<>();
-            resposta.put("status", 200);
-            resposta.put("mensagem", "Doença erradicada com sucesso");
-
-            return ResponseEntity.ok(resposta);
-        } else {
+        if (doenca.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Doença não encontrada");
         }
+
+        doencaRepository.delete(doenca.get());
+
+        Map<String, Object> resposta = new HashMap<>();
+        resposta.put("status", 200);
+        resposta.put("mensagem", "Doença erradicada com sucesso");
+
+        return ResponseEntity.ok(resposta);
     }
 }

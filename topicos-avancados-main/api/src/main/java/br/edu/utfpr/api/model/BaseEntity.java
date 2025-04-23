@@ -1,5 +1,8 @@
 package br.edu.utfpr.api.model;
 
+import java.time.LocalDateTime;
+
+import jakarta.persistence.Column;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -20,7 +23,9 @@ public abstract class BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     protected long id;
 
-    //data de cricao
+    @Column(name= "creation_date", nullable = false)
+    protected LocalDateTime creationDate;
 
-    //data de atualizacao
+    @Column(name= "update_date", nullable = true)
+    protected LocalDateTime updateDate;
 }

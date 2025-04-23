@@ -10,7 +10,6 @@ Content-Type: application/json
     "epocaPlantio": "março"
 }
 
-
 ###Deletar uma cultura
 DELETE {{URL}}?id=1
 Content-Type: application/json
