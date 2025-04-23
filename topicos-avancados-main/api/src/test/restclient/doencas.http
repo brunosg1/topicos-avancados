@@ -7,12 +7,7 @@ Content-Type: application/json
 {
     "nome": "preguiça",
     "sintomas": "rafaela",
-    "culturasAfetadas":
-    [
-        {
-            "id": 1
-        }
-    ],
+    "culturasAfetadas":[1],
     "tratamentos": "bla"
 }
 

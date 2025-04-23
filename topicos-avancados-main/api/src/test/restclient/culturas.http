@@ -6,8 +6,8 @@ Content-Type: application/json
 
 {
     "nome": "rafazinho123",
-    "tempo_cultivo_dias": 5,
-    "epoca_plantio": "março"
+    "tempoCultivoDias": 5,
+    "epocaPlantio": "março"
 }
 
 
@@ -22,8 +22,8 @@ Content-Type: application/json
 {
     "id": 2,
     "nome": "clebinho",
-    "tempo_cultivo_dias": 5,
-    "epoca_plantio": "março"
+    "tempoCultivoDias": 5,
+    "epocaPlantio": "março"
 }
 
 ###Receber uma cultura

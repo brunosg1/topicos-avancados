@@ -5,8 +5,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
+import br.edu.utfpr.api.dto.DoencaDTO;
 import br.edu.utfpr.api.model.Cultura;
 import br.edu.utfpr.api.model.Doenca;
+import br.edu.utfpr.api.repository.CulturaRepository;
 import br.edu.utfpr.api.repository.DoencaRepository;
 
 import java.util.ArrayList;
@@ -31,6 +33,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 public class DoencaController {
     @Autowired
     private DoencaRepository doencaRepository;
+
+    @Autowired
+    private CulturaRepository culturaRepository;
 
     @GetMapping({"", "/"})
     public List<Doenca> get(@RequestParam(required = false) String nome) {
@@ -67,8 +72,25 @@ public class DoencaController {
     }
 
     @PostMapping({"", "/"})
-    public Doenca post(@RequestBody Doenca p){
-        return doencaRepository.save(p);
+    public Doenca post(@RequestBody DoencaDTO p) {
+        var culturas = new ArrayList<Cultura>();
+
+        for (Long id : p.culturasAfetadas) {
+            Cultura cultura = culturaRepository.findById(id).get();
+            culturas.add(cultura);
+        }
+
+        if(culturas.isEmpty()){
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Culturas não encontradas");
+        }
+
+        var doenca = new Doenca();
+        doenca.setNome(p.nome);
+        doenca.setSintomas(p.sintomas);
+        doenca.setCulturasAfetadas(culturas);
+        doenca.setTratamentos(p.tratamentos);
+
+        return doencaRepository.save(doenca);
     }
 
     @DeleteMapping({"", "/"})
