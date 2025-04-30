@@ -1,11 +1,32 @@
 @URL=http://localhost:8080/propriedades
 
-###Criar uma Pessoa
+###Criar uma propriedade
 POST {{URL}}
 Content-Type: application/json
 
 {
-    "nome": "funrural2",
-    "tamanho_ha": 589489385934.2,
-    "responsavel": "clebersonsantos@gmail.com"
+    "nome": "preguiça",
+    "tamanhoHa": 5,
+    "responsavel": "adolfo"
 }
+
+###Deletar uma propriedade
+#DELETE {{URL}}/1
+DELETE {{URL}}/1
+Content-Type: application/json
+
+###Editar uma propriedade
+PUT {{URL}}
+Content-Type: application/json
+
+{
+    "nome": "clebinho_pragas",
+    "nomeCientifico": "angelica",
+    "culturasAfetadas":[1],
+    "descricao": "bla"
+}
+
+###Receber uma propriedade
+
+GET {{URL}}
+Content-Type: application/json

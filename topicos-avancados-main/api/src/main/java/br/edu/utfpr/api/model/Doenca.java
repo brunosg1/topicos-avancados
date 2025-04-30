@@ -8,6 +8,8 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -20,13 +22,15 @@ import lombok.ToString;
 
 public class Doenca extends BaseEntity {
 
+    @NotBlank(message = "Nome obrigatório")
     @Column(name = "nome", nullable = false, length = 100)
     private String nome;
 
+    @NotBlank(message = "Sintomas obrigatórios")
     @Column(name = "sintomas", nullable = false, length = 100)
     private String sintomas;
 
-    @ManyToMany
+    @Size(min = 1, message = "A lista de culturas deve ter pelo menos um item")    @ManyToMany
     @JoinTable(
         name = "doenca_cultura",
         joinColumns = @JoinColumn(name = "doenca_id"),
@@ -34,6 +38,7 @@ public class Doenca extends BaseEntity {
     )
     private List<Cultura> culturasAfetadas;
 
+    @NotBlank(message = "Tratamentos obrigatórios")
     @Column(name = "tratamentos", nullable = false, length = 100)
     private String tratamentos;
 }

@@ -5,13 +5,13 @@ POST {{URL}}
 Content-Type: application/json
 
 {
-    "nome": "rafazinho123",
+    "nome": "23",
     "tempoCultivoDias": 5,
-    "epocaPlantio": "março"
+    "epocaPlantio": "dasas"
 }
 
 ###Deletar uma cultura
-DELETE {{URL}}?id=1
+DELETE {{URL}}/10
 Content-Type: application/json
 
 ###Editar uma cultura
@@ -26,5 +26,5 @@ Content-Type: application/json
 }
 
 ###Receber uma cultura
-GET {{URL}}?nome=rafazinho123
+GET {{URL}}/2
 Content-Type: application/json

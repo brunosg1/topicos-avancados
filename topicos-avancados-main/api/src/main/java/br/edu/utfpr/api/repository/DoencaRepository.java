@@ -14,4 +14,7 @@ public interface DoencaRepository extends JpaRepository<Doenca, Long> {
 
     @Query("SELECT d FROM Doenca d LEFT JOIN FETCH d.culturasAfetadas")
     List<Doenca> findAllWithCulturas();
+
+    @Query("SELECT d FROM Doenca d LEFT JOIN FETCH d.culturasAfetadas WHERE d.id = :id")
+    List<Doenca> findByIDWithCulturas(@Param("id") Long id);
 }

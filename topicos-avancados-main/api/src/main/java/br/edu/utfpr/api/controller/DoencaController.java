@@ -11,6 +11,7 @@ import br.edu.utfpr.api.model.Cultura;
 import br.edu.utfpr.api.model.Doenca;
 import br.edu.utfpr.api.repository.CulturaRepository;
 import br.edu.utfpr.api.repository.DoencaRepository;
+import jakarta.validation.Valid;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -24,6 +25,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -39,14 +41,14 @@ public class DoencaController {
     @Autowired
     private CulturaRepository culturaRepository;
 
-    @GetMapping
-    public ResponseEntity<List<DoencaResponseDTO>> get(@RequestParam(required = false) String nome) {
+    @GetMapping({"", "/"})
+    public ResponseEntity<List<DoencaResponseDTO>> getAll(@RequestParam(required = false) Long id) {
         List<Doenca> doencas;
 
-        if (nome == null || nome.isEmpty()) {
+        if (id == null) {
             doencas = doencaRepository.findAllWithCulturas();
         } else {
-            doencas = doencaRepository.findByNomeIgnoreCaseWithCulturas(nome);
+            doencas = doencaRepository.findByIDWithCulturas(id);
         }
 
         if (doencas.isEmpty()) {
@@ -54,14 +56,23 @@ public class DoencaController {
         }
 
         List<DoencaResponseDTO> dtos = doencas.stream()
-                                              .map(DoencaResponseDTO::new)
-                                              .collect(Collectors.toList());
+                                             .map(DoencaResponseDTO::new)
+                                             .collect(Collectors.toList());
 
         return ResponseEntity.ok(dtos);
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<DoencaResponseDTO> getById(@PathVariable Long id) {
+        Doenca doenca = doencaRepository.findById(id)
+                                       .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Doença não encontrada"));
+
+        DoencaResponseDTO dto = new DoencaResponseDTO(doenca);
+        return ResponseEntity.ok(dto);
+    }
+
     @PutMapping({"", "/"})
-    public ResponseEntity<Doenca> put(@RequestBody DoencaDTO doencaDTO) {
+    public ResponseEntity<Doenca> put(@RequestBody @Valid DoencaDTO doencaDTO) {
         Optional<Doenca> doencaExistente = doencaRepository.findById(doencaDTO.id);
 
         if (doencaExistente.isEmpty()) {
@@ -85,7 +96,7 @@ public class DoencaController {
     }
 
     @PostMapping({"", "/"})
-    public ResponseEntity<Doenca> post(@RequestBody DoencaDTO p) {
+    public ResponseEntity<Doenca> post(@RequestBody @Valid DoencaDTO p) {
         List<Cultura> culturas = p.culturasAfetadas.stream()
             .map(id -> culturaRepository.findById(id)
                         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Cultura com ID " + id + " não encontrada")))
@@ -102,8 +113,8 @@ public class DoencaController {
         return ResponseEntity.status(HttpStatus.CREATED).body(salva);
     }
 
-    @DeleteMapping({"", "/"})
-    public ResponseEntity<Map<String, Object>> delete(@RequestParam long id) {
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Map<String, Object>> delete(@PathVariable long id) {
         Optional<Doenca> doenca = doencaRepository.findById(id);
 
         if (doenca.isEmpty()) {

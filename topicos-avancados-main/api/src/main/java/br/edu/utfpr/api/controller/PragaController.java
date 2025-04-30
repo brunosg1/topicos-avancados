@@ -11,6 +11,7 @@ import br.edu.utfpr.api.model.Cultura;
 import br.edu.utfpr.api.model.Praga;
 import br.edu.utfpr.api.repository.CulturaRepository;
 import br.edu.utfpr.api.repository.PragaRepository;
+import jakarta.validation.Valid;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -24,6 +25,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -39,14 +41,14 @@ public class PragaController {
     @Autowired
     private CulturaRepository culturaRepository;
 
-    @GetMapping
-    public ResponseEntity<List<PragaResponseDTO>> get(@RequestParam(required = false) String nome) {
+    @GetMapping({"", "/"})
+    public ResponseEntity<List<PragaResponseDTO>> getAll(@RequestParam(required = false) Long id) {
         List<Praga> pragas;
 
-        if (nome == null || nome.isEmpty()) {
+        if (id == null) {
             pragas = pragaRepository.findAllWithCulturas();
         } else {
-            pragas = pragaRepository.findByNomeIgnoreCaseWithCulturas(nome);
+            pragas = pragaRepository.findByIDWithCulturas(id);
         }
 
         if (pragas.isEmpty()) {
@@ -60,8 +62,17 @@ public class PragaController {
         return ResponseEntity.ok(dtos);
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<PragaResponseDTO> getById(@PathVariable Long id) {
+        Praga praga = pragaRepository.findById(id)
+                                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Praga não encontrada"));
+
+        PragaResponseDTO dto = new PragaResponseDTO(praga);
+        return ResponseEntity.ok(dto);
+    }
+
     @PutMapping({"", "/"})
-    public ResponseEntity<Praga> put(@RequestBody PragaDTO pragaDTO) {
+    public ResponseEntity<Praga> put(@RequestBody @Valid PragaDTO pragaDTO) {
         Optional<Praga> pragaExistente = pragaRepository.findById(pragaDTO.id);
 
         if (pragaExistente.isEmpty()) {
@@ -85,7 +96,7 @@ public class PragaController {
     }
 
     @PostMapping({"", "/"})
-    public ResponseEntity<Praga> post(@RequestBody PragaDTO p) {
+    public ResponseEntity<Praga> post(@RequestBody @Valid PragaDTO p) {
         List<Cultura> culturas = p.culturasAfetadas.stream()
             .map(id -> culturaRepository.findById(id)
                         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Cultura com ID " + id + " não encontrada")))
@@ -102,8 +113,8 @@ public class PragaController {
         return ResponseEntity.status(HttpStatus.CREATED).body(salva);
     }
 
-    @DeleteMapping({"", "/"})
-    public ResponseEntity<Map<String, Object>> delete(@RequestParam long id) {
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Map<String, Object>> delete(@PathVariable long id) {
         Optional<Praga> praga = pragaRepository.findById(id);
 
         if (praga.isEmpty()) {

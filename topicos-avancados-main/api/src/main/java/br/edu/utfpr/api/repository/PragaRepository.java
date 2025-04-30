@@ -14,4 +14,7 @@ public interface PragaRepository extends JpaRepository<Praga, Long> {
 
     @Query("SELECT d FROM Praga d LEFT JOIN FETCH d.culturasAfetadas")
     List<Praga> findAllWithCulturas();
+
+    @Query("SELECT d FROM Praga d LEFT JOIN FETCH d.culturasAfetadas WHERE d.id = :id")
+    List<Praga> findByIDWithCulturas(@Param("id") Long id);
 }

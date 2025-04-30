@@ -5,9 +5,9 @@ POST {{URL}}
 Content-Type: application/json
 
 {
-    "nome": "preguiça",
+    "nome": "",
     "sintomas": "rafaela",
-    "culturasAfetadas":[1],
+    "culturasAfetadas":[2,4, 5],
     "tratamentos": "bla"
 }
 
@@ -20,7 +20,7 @@ PUT {{URL}}
 Content-Type: application/json
 
 {
-    "id": 1,
+    "id": 2,
     "nome": "clebinho_doencas",
     "sintomas": "angelica",
     "culturasAfetadas":[2],

@@ -7,11 +7,12 @@ Content-Type: application/json
 {
     "nome": "preguiça",
     "nomeCientifico": "rafaela",
-    "culturasAfetadas":[1],
+    "culturasAfetadas":[2],
     "descricao": "bla"
 }
 
 ###Deletar uma praga
+#DELETE {{URL}}/1
 DELETE {{URL}}?id=1
 Content-Type: application/json
 
@@ -20,14 +21,13 @@ PUT {{URL}}
 Content-Type: application/json
 
 {
-    "id": 1,
-    "nome": "clebinho_doencas",
+    "nome": "clebinho_pragas",
     "nomeCientifico": "angelica",
-    "culturasAfetadas":[2],
+    "culturasAfetadas":[1],
     "descricao": "bla"
 }
 
 ###Receber uma praga
 
-GET {{URL}}
+GET {{URL}}?id=2
 Content-Type: application/json
