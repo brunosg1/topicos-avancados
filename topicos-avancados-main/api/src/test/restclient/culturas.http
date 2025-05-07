@@ -28,3 +28,6 @@ Content-Type: application/json
 ###Receber uma cultura
 GET {{URL}}/2
 Content-Type: application/json
+
+
+###
