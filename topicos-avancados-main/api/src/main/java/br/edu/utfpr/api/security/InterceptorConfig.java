@@ -15,6 +15,8 @@ public class InterceptorConfig implements WebMvcConfigurer {
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(cognitoTokenValidationInterceptor)
                 .addPathPatterns("/culturas/**")
-                .addPathPatterns("/doencas/**"); // Aplica o interceptor aos seus endpoints protegidos
+                .addPathPatterns("/doencas/**")
+                .addPathPatterns("/pragas/**")
+                .addPathPatterns("/propriedades/**"); // Aplica o interceptor aos seus endpoints protegidos
     }
 }

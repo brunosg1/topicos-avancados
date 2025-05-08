@@ -33,9 +33,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.nio.charset.StandardCharsets;
 
 import br.edu.utfpr.api.dto.AuthRequest;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RestController
 @RequestMapping("/auth")
+@Tag(name = "Validação", description = "Autenticação para usuário logado")
 public class AuthController {
     private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
 
@@ -52,12 +57,17 @@ public class AuthController {
     private String clientSecret;
 
     private final Map<String, PublicKey> publicKeyCache = new HashMap<>();
-
     private final RestTemplate restTemplate = new RestTemplate();
-
-    private ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @PostMapping("/login")
+    @Operation(summary = "Login", description = "Tenta efetuar login no sistema")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Login realizado com sucesso"),
+        @ApiResponse(responseCode = "400", description = "Requisição inválida"),
+        @ApiResponse(responseCode = "401", description = "Credenciais inválidas"),
+        @ApiResponse(responseCode = "500", description = "Erro interno no servidor")
+    })
     public ResponseEntity<?> login(@RequestBody AuthRequest authRequest) {
         try {
             String secretHash = calculateSecretHash(authRequest.getUsername());
@@ -76,15 +86,8 @@ public class AuthController {
             headers.set("Content-Type", "application/x-amz-json-1.1");
             headers.set("X-Amz-Target", "AWSCognitoIdentityProviderService.InitiateAuth");
 
-            // Serializa o payload como JSON
             String body = objectMapper.writeValueAsString(payload);
-
             HttpEntity<String> request = new HttpEntity<>(body, headers);
-
-            System.out.println("URL: " + cognitoUrl);
-            System.out.println("Payload: " + payload);
-            System.out.println("Headers: " + headers);
-            System.out.println("Entity: " + request);
 
             ResponseEntity<String> response = restTemplate.postForEntity(cognitoUrl, request, String.class);
             return ResponseEntity.status(response.getStatusCode()).body(response.getBody());
@@ -95,11 +98,15 @@ public class AuthController {
     }
 
     @PostMapping("/validate")
-    public ResponseEntity<Map<String, Object>> validateToken(
-            @RequestHeader("Authorization") String authorizationHeader) {
+    @Operation(summary = "Valida token", description = "Valida o token de autorização")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Token válido"),
+        @ApiResponse(responseCode = "401", description = "Token inválido ou expirado"),
+        @ApiResponse(responseCode = "500", description = "Erro ao validar token")
+    })
+    public ResponseEntity<Map<String, Object>> validateToken(@RequestHeader("Authorization") String authorizationHeader) {
         if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
             String token = authorizationHeader.substring(7);
-
             try {
                 DecodedJWT jwt = JWT.decode(token);
                 String keyId = jwt.getHeaderClaim("kid").asString();
@@ -111,40 +118,38 @@ public class AuthController {
 
                     Map<String, Object> response = new HashMap<>();
                     response.put("valid", true);
-                    response.put("claims", jwt.getClaims()); // Você pode retornar as claims se precisar
+                    response.put("claims", jwt.getClaims());
                     return ResponseEntity.ok(response);
-                } else {
-                    logger.error("Chave pública não encontrada para o token.");
                 }
-
             } catch (JWTVerificationException e) {
-                logger.error("Token JWT do Cognito inválido: {}", e.getMessage());
+                logger.error("Token inválido: {}", e.getMessage());
             } catch (Exception e) {
-                logger.error("Erro ao validar token do Cognito: {}", e.getMessage());
+                logger.error("Erro ao validar token: {}", e.getMessage());
             }
         }
 
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("valid", false, "message", "Token inválido"));
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(Map.of("valid", false, "message", "Token inválido"));
     }
 
     @PostMapping("/refresh")
+    @Operation(summary = "Refresh token", description = "Tenta reiniciar o token para continuar autorizado")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Token renovado com sucesso"),
+        @ApiResponse(responseCode = "400", description = "Refresh token ausente ou inválido"),
+        @ApiResponse(responseCode = "401", description = "Refresh token inválido"),
+        @ApiResponse(responseCode = "500", description = "Erro ao processar a renovação do token")
+    })
     public ResponseEntity<?> refreshToken(@RequestBody Map<String, String> payload) {
         String refreshToken = payload.get("refreshToken");
         String username = payload.get("username");
-
 
         if (refreshToken == null || refreshToken.isEmpty()) {
             return ResponseEntity.badRequest().body(Map.of("error", "refresh_token_required"));
         }
 
         try {
-            logger.info("Tentando refresh token: {}", refreshToken);
-            logger.info("Usando ClientId: {}", clientId);
-            logger.info("Usando ClientSecret: {}", clientSecret);
-            logger.info("Usando username: {}", username);
             String secretHash = calculateSecretHash(username);
-            logger.info("SecretHash calculado para refresh: {}", secretHash);
-    
 
             HttpHeaders headers = new HttpHeaders();
             headers.set("Content-Type", "application/x-amz-json-1.1");
@@ -159,15 +164,10 @@ public class AuthController {
             body.put("ClientId", clientId);
             body.put("AuthParameters", authParams);
 
-            String jsonBody = objectMapper.writeValueAsString(body); // Converter o body para String JSON
+            String jsonBody = objectMapper.writeValueAsString(body);
+            HttpEntity<String> request = new HttpEntity<>(jsonBody, headers);
 
-            HttpEntity<String> request = new HttpEntity<>(jsonBody, headers); // Usar String como corpo
-
-            ResponseEntity<JsonNode> response = restTemplate.exchange(cognitoUrl,
-                    HttpMethod.POST,
-                    request,
-                    JsonNode.class);
-                    
+            ResponseEntity<JsonNode> response = restTemplate.exchange(cognitoUrl, HttpMethod.POST, request, JsonNode.class);
 
             if (response.getStatusCode() == HttpStatus.OK && response.getBody() != null) {
                 JsonNode authResultNode = response.getBody().get("AuthenticationResult");
@@ -175,8 +175,6 @@ public class AuthController {
                     Map<String, String> refreshedTokens = new HashMap<>();
                     refreshedTokens.put("idToken", authResultNode.get("IdToken").asText());
                     refreshedTokens.put("accessToken", authResultNode.get("AccessToken").asText());
-                    // O Refresh Token geralmente não é retornado na resposta de refresh.
-                    // O cliente deve armazenar o Refresh Token original.
                     return ResponseEntity.ok(refreshedTokens);
                 } else {
                     logger.error("Resposta de refresh token inesperada: {}", response.getBody());
@@ -184,13 +182,12 @@ public class AuthController {
                             .body(Map.of("error", "invalid_refresh_token_response"));
                 }
             } else {
-                logger.error("Erro ao renovar token. Status: {}, Corpo: {}", response.getStatusCode(),
-                        response.getBody());
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "invalid_refresh_token"));
+                logger.error("Erro ao renovar token. Status: {}, Corpo: {}", response.getStatusCode(), response.getBody());
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body(Map.of("error", "invalid_refresh_token"));
             }
 
         } catch (Exception e) {
-            e.printStackTrace();
             logger.error("Erro ao processar a renovação do token", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Map.of("error", "refresh_token_processing_error", "details", e.getMessage()));

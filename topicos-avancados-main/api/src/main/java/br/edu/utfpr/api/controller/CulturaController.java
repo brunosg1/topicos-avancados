@@ -23,9 +23,17 @@ import org.springframework.web.server.ResponseStatusException;
 import br.edu.utfpr.api.dto.CulturaDTO;
 import br.edu.utfpr.api.model.Cultura;
 import br.edu.utfpr.api.repository.CulturaRepository;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 
 @Validated
+@SecurityRequirement(name = "Authorization")
+@Tag(name = "Cultura", description = "Culturas como soja, milho, dentre outras")
 @RestController
 @RequestMapping(value = "/culturas", produces = "application/json")
 public class CulturaController {
@@ -33,24 +41,39 @@ public class CulturaController {
     @Autowired
     private CulturaRepository culturaRepository;
 
-    @GetMapping({ "", "/" })
+    @Operation(summary = "Obtem culturas", description = "Obtem todas as culturas cadastradas")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Culturas obtidas com sucesso"),
+        @ApiResponse(responseCode = "500", description = "Erro interno do servidor")
+    })
+    @GetMapping({ "" })
     public ResponseEntity<List<Cultura>> getAll() {
-        // Se não houver ID, retorna todas as culturas
         List<Cultura> culturas = culturaRepository.findAll();
         return ResponseEntity.ok(culturas);
     }
 
+    @Operation(summary = "Obter por id", description = "Obtem uma cultura pelo ID")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Cultura encontrada"),
+        @ApiResponse(responseCode = "404", description = "Cultura não encontrada"),
+        @ApiResponse(responseCode = "500", description = "Erro interno do servidor")
+    })
     @GetMapping("/{id}")
-    public ResponseEntity<List<Cultura>> getById(@PathVariable Long id) {
-        // Se houver ID, retorna a cultura específica
+    public ResponseEntity<List<Cultura>> getById(@Parameter(required = true) @PathVariable Long id) {
         List<Cultura> culturas = culturaRepository.findById(id)
-                .map(cultura -> List.of(cultura)) // Cria uma lista com a cultura encontrada
+                .map(cultura -> List.of(cultura))
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Cultura não encontrada"));
 
         return ResponseEntity.ok(culturas);
     }
 
-    @PostMapping({ "", "/" })
+    @Operation(summary = "Salvar Cultura", description = "Salva uma cultura no banco de dados")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "201", description = "Cultura criada com sucesso"),
+        @ApiResponse(responseCode = "400", description = "Dados de entrada inválidos"),
+        @ApiResponse(responseCode = "500", description = "Erro interno do servidor")
+    })
+    @PostMapping({ "" })
     public ResponseEntity<Cultura> post(@Valid @RequestBody CulturaDTO p, BindingResult bindingResult) {
         System.out.println("CulturaDTO recebido: " + p.nome);
         var cultura = new Cultura();
@@ -63,8 +86,15 @@ public class CulturaController {
         return ResponseEntity.status(HttpStatus.CREATED).body(salva);
     }
 
-    @PutMapping({ "", "/" })
-    public ResponseEntity<Cultura> put(@RequestBody @Valid Cultura cultura) {
+    @Operation(summary = "Editar cultura", description = "Edita ou altera uma cultura no banco de dados")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Cultura atualizada com sucesso"),
+        @ApiResponse(responseCode = "404", description = "Cultura não encontrada"),
+        @ApiResponse(responseCode = "400", description = "Dados inválidos"),
+        @ApiResponse(responseCode = "500", description = "Erro interno do servidor")
+    })
+    @PutMapping({ "" })
+    public ResponseEntity<Cultura> put(@RequestBody @Parameter(required = true) @Valid Cultura cultura) {
         Cultura existente = culturaRepository.findById(cultura.getId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Cultura não encontrada"));
 
@@ -77,8 +107,14 @@ public class CulturaController {
         return ResponseEntity.ok(atualizada);
     }
 
+    @Operation(summary = "Deleta cultura", description = "Deleta uma cultura no banco de dados")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Cultura deletada com sucesso"),
+        @ApiResponse(responseCode = "404", description = "Cultura não encontrada"),
+        @ApiResponse(responseCode = "500", description = "Erro interno do servidor")
+    })
     @DeleteMapping("/{id}")
-    public ResponseEntity<Map<String, Object>> delete(@PathVariable @Valid long id) {
+    public ResponseEntity<Map<String, Object>> delete(@PathVariable @Parameter(required = true) @Valid long id) {
         Cultura cultura = culturaRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Cultura não encontrada"));
 

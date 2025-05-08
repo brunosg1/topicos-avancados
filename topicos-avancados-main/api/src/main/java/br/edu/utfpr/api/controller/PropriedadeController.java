@@ -8,6 +8,11 @@ import org.springframework.web.server.ResponseStatusException;
 import br.edu.utfpr.api.dto.PropriedadeDTO;
 import br.edu.utfpr.api.model.Propriedade;
 import br.edu.utfpr.api.repository.PropriedadeRepository;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 
 import java.time.LocalDateTime;
@@ -27,14 +32,21 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
 @RestController
-@RequestMapping(value="/propriedades", produces = "application/json")
+@SecurityRequirement(name = "Authorization")
+@Tag(name = "Propriedades", description = "Todas as propriedades cadastradas no sistema")
+@RequestMapping(value = "/propriedades", produces = "application/json")
 public class PropriedadeController {
 
     @Autowired
     private PropriedadeRepository propriedadeRepository;
 
-    // GET (busca)
-    @GetMapping({"", "/"})
+    @Operation(summary = "Obtem propriedades", description = "Obtem todas as propriedades cadastradas")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Propriedades retornadas com sucesso"),
+        @ApiResponse(responseCode = "404", description = "Nenhuma propriedade encontrada"),
+        @ApiResponse(responseCode = "500", description = "Erro interno do servidor")
+    })
+    @GetMapping({ "" })
     public ResponseEntity<List<Propriedade>> getAll(@RequestParam(required = false) Long id) {
         List<Propriedade> propriedades;
 
@@ -51,16 +63,27 @@ public class PropriedadeController {
         return ResponseEntity.ok(propriedades);
     }
 
+    @Operation(summary = "Obter por id", description = "Obtem uma propriedade pelo ID")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Propriedade encontrada com sucesso"),
+        @ApiResponse(responseCode = "404", description = "Propriedade não encontrada")
+    })
     @GetMapping("/{id}")
     public ResponseEntity<Propriedade> getById(@PathVariable Long id) {
         Propriedade propriedade = propriedadeRepository.findById(id)
-                                                      .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Propriedade não encontrada"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Propriedade não encontrada"));
 
         return ResponseEntity.ok(propriedade);
     }
 
-    // PUT (atualização)
-    @PutMapping({"", "/"})
+    @Operation(summary = "Salvar propriedade", description = "Salva uma propriedade nova no banco de dados")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Propriedade atualizada com sucesso"),
+        @ApiResponse(responseCode = "404", description = "Propriedade não encontrada"),
+        @ApiResponse(responseCode = "400", description = "Dados inválidos"),
+        @ApiResponse(responseCode = "500", description = "Erro interno do servidor")
+    })
+    @PutMapping({ "" })
     public ResponseEntity<Propriedade> put(@RequestBody @Valid Propriedade propriedade) {
         Optional<Propriedade> propriedadeExistente = propriedadeRepository.findById(propriedade.getId());
 
@@ -78,9 +101,14 @@ public class PropriedadeController {
         }
     }
 
-    // POST (criação)
-    @PostMapping({"", "/"})
-    public ResponseEntity<Propriedade> post(@RequestBody @Valid PropriedadeDTO p){
+    @Operation(summary = "Editar propriedade", description = "Edita ou altera uma propriedade no banco de dados")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "201", description = "Propriedade criada com sucesso"),
+        @ApiResponse(responseCode = "400", description = "Dados inválidos"),
+        @ApiResponse(responseCode = "500", description = "Erro interno do servidor")
+    })
+    @PostMapping({ "" })
+    public ResponseEntity<Propriedade> post(@RequestBody @Valid PropriedadeDTO p) {
         var propriedade = new Propriedade();
         propriedade.setNome(p.nome);
         propriedade.setTamanhoHa(p.tamanhoHa);
@@ -91,8 +119,13 @@ public class PropriedadeController {
         return ResponseEntity.status(HttpStatus.CREATED).body(salva);
     }
 
-    // DELETE
-    @DeleteMapping({"/{id}"})
+    @Operation(summary = "Deleta propriedade", description = "Deleta uma propriedade no banco de dados")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Propriedade deletada com sucesso"),
+        @ApiResponse(responseCode = "404", description = "Propriedade não encontrada"),
+        @ApiResponse(responseCode = "500", description = "Erro interno do servidor")
+    })
+    @DeleteMapping({ "/{id}" })
     public ResponseEntity<Map<String, Object>> delete(@PathVariable long id) {
         Optional<Propriedade> propriedade = propriedadeRepository.findById(id);
 
