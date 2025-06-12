@@ -1,7 +1,9 @@
 package br.edu.utfpr.api.security;
 
+import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
 import java.security.interfaces.RSAPublicKey;
+import java.security.spec.InvalidKeySpecException;
 import java.util.Base64;
 import java.util.Map;
 
@@ -11,6 +13,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.HandlerInterceptor;
 
@@ -19,7 +22,6 @@ import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -37,7 +39,6 @@ public class CognitoTokenValidationInterceptor implements HandlerInterceptor {
 
     private final Map<String, PublicKey> publicKeyCache = new java.util.HashMap<>();
     private final RestTemplate restTemplate = new RestTemplate();
-    private final ObjectMapper objectMapper = new ObjectMapper();
 
     private PublicKey getPublicKey(String keyId) {
         System.out.println("Buscando chave pública para o kid: " + keyId);
@@ -73,7 +74,7 @@ public class CognitoTokenValidationInterceptor implements HandlerInterceptor {
             }
             logger.error("Chave pública não encontrada para kid: {}", keyId);
 
-        } catch (Exception e) {
+        } catch (NoSuchAlgorithmException | InvalidKeySpecException | RestClientException e) {
             logger.error("Erro ao buscar chaves públicas do Cognito: {}", e.getMessage());
         }
         return null;
@@ -104,7 +105,7 @@ public class CognitoTokenValidationInterceptor implements HandlerInterceptor {
 
             } catch (JWTVerificationException e) {
                 logger.error("Token JWT do Cognito inválido: {}", e.getMessage());
-            } catch (Exception e) {
+            } catch (IllegalArgumentException e) {
                 logger.error("Erro ao validar token do Cognito: {}", e.getMessage());
             }
         }

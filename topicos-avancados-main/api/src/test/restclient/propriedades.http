@@ -1,5 +1,7 @@
 @URL=http://localhost:8080/propriedades
 
+@token=eyJraWQiOiIxZmhBN0w0K21PZTM1VXVpNWgxMEttUWRQODZsS1g1c1R6YU1GdUQxWmtrPSIsImFsZyI6IlJTMjU2In0
+
 ###Criar uma propriedade
 POST {{URL}}
 Content-Type: application/json
@@ -30,3 +32,4 @@ Content-Type: application/json
 
 GET {{URL}}
 Content-Type: application/json
+Authorization: Bearer {{token}}
