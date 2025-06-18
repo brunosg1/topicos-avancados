@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Login } from '../services/api.js';
 import { AuthService } from '../services/authService';
+import { useNavigate } from 'react-router-dom'; // Importe useNavigate
 
 const LoginPage = () => {
   const [formData, setFormData] = useState({
@@ -9,6 +10,8 @@ const LoginPage = () => {
   });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+
+  const navigate = useNavigate(); // Inicialize useNavigate
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -32,15 +35,14 @@ const LoginPage = () => {
       const accessToken = response.data.AuthenticationResult.AccessToken;
 
       AuthService.setToken(accessToken);
-      
+
       console.log('Login realizado com sucesso:', accessToken);
-      alert('Login realizado com sucesso!');
-      
-      // navigate('/cadastro');
-      
+
+      navigate('/monitoramento'); // Navega para a página de monitoramento
+
     } catch (error) {
       console.error('Erro no login:', error);
-      
+
       if (error.response) {
         // Erro da API (4xx, 5xx)
         setError(error.response.data.message || 'Usuário ou senha inválidos');
@@ -62,14 +64,14 @@ const LoginPage = () => {
         <h1 className="text-2xl font-bold text-center mb-6 text-gray-800">
           Login
         </h1>
-        
+
         <form onSubmit={handleSubmit} className="space-y-4">
           {error && (
             <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-md text-sm">
               {error}
             </div>
           )}
-          
+
           <div>
             <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-1">
               Usuário

@@ -216,7 +216,12 @@ const CadastroPage = () => {
           <FaSeedling /> AgroSistema
         </h2>
         <nav className="space-y-3">
-          <Link to="/cadastro" className="flex items-center gap-2 text-green-700 hover:font-semibold">
+          <Link
+            to="/login"
+            className="flex items-center gap-2 text-green-700 hover:font-semibold">
+            <FaHome /> Logout
+          </Link>
+          <Link to="/cadastro" className="flex items-center gap-2 text-green-700 hover:font-semibold font-semibold">
             <FaHome /> Cadastro
           </Link>
           <Link to="/monitoramento" className="flex items-center gap-2 text-green-700 hover:font-semibold">

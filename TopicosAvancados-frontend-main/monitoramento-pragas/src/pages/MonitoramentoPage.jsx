@@ -411,14 +411,18 @@ const MonitoramentoPage = () => {
         </h2>
         <nav className="space-y-3">
           <Link
-            to="/cadastro"
+            to="/login"
+            className="flex items-center gap-2 text-green-700 hover:font-semibold">
+            <FaHome /> Logout
+          </Link>
+          <Link
+            to="/cadastros"
             className="flex items-center gap-2 text-green-700 hover:font-semibold">
             <FaHome /> Cadastro
           </Link>
           <Link
             to="/monitoramento"
-            className="flex items-center gap-2 text-green-700 hover:font-semibold font-semibold"
-          >
+            className="flex items-center gap-2 text-green-700 hover:font-semibold font-semibold">
             <FaTractor /> Monitoramento
           </Link>
           <Link
