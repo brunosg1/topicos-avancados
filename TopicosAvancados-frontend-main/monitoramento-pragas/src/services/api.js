@@ -15,48 +15,25 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-export const cadastrarPropriedade = (data) => api.post("/propriedades", data, {
-    headers: {
-      'Content-Type': 'application/json'
-    }
-  });
-export const cadastrarCultura = (data) => api.post("/culturas", data, {
-    headers: {
-      'Content-Type': 'application/json'
-    }
-  });
-export const cadastrarTipoPraga = (data) => api.post("/pragas", data, {
-    headers: {
-      'Content-Type': 'application/json'
-    }
-  });
-export const cadastrarTipoDoenca = (data) => api.post("/doencas", data, {
-    headers: {
-      'Content-Type': 'application/json'
-    }
-  });
+export const cadastrarPropriedade = (data) => api.post("/propriedades", data, { headers: { 'Content-Type': 'application/json' } });
+export const cadastrarCultura = (data) => api.post("/culturas", data, { headers: { 'Content-Type': 'application/json' } });
+export const cadastrarTipoPraga = (data) => api.post("/pragas", data, { headers: { 'Content-Type': 'application/json' } });
+export const cadastrarTipoDoenca = (data) => api.post("/doencas", data, { headers: { 'Content-Type': 'application/json' } });
 
-export const registrarOcorrencia = (data) => api.post("/ocorrencias", data, {
-    headers: {
-      'Content-Type': 'application/json'
-    }
-  });
-export const listarOcorrencias = () => api.get("/ocorrencias", {
-    headers: {
-      'Content-Type': 'application/json'
-    }
-  });
+export const deletarDoenca = (id) => api.delete(`/doencas/${id}`, { headers: { 'Content-Type': 'application/json' } });
+export const deletarPraga = (id) => api.delete(`/pragas/${id}`, { headers: { 'Content-Type': 'application/json' } });
+export const deletarCultura = (id) => api.delete(`/culturas/${id}`, { headers: { 'Content-Type': 'application/json' } });
+export const deletarPropriedade = (id) => api.delete(`/propriedades/${id}`, { headers: { 'Content-Type': 'application/json' }});
+
+export const editarPropriedade = (data) => api.put("/propriedades", data, { headers: { 'Content-Type': 'application/json' } });
+export const editarCultura = (data) => api.put("/culturas", data, { headers: { 'Content-Type': 'application/json' } });
+export const editarTipoPraga = (data) => api.put("/pragas", data, { headers: { 'Content-Type': 'application/json' } });
+export const editarTipoDoenca = (data) => api.put("/doencas", data, { headers: { 'Content-Type': 'application/json' } });
+
+export const registrarOcorrencia = (data) => api.post("/ocorrencias", data, { headers: { 'Content-Type': 'application/json' }});
+export const listarOcorrencias = () => api.get("/ocorrencias", { headers: {'Content-Type': 'application/json'}});
 export const Login = (data) => api_auth.post("/login", data);
 
-
-
-// services/api.js - Funções GET para monitoramento
-
-// Headers padrão
-const defaultHeaders = {
-  'Content-Type': 'application/json',
-  'Accept': 'application/json'
-};
 
 // Função auxiliar para fazer requisições GET
 const makeGetRequest = async (endpoint) => {
