@@ -1,10 +1,21 @@
+/*
+  REMOVIDO: A maioria dessas regras são ou específicas demais
+  para um arquivo global ou podem ser substituídas pelo Tailwind.
+*/
+@import "tailwindcss";
 #root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
+  /* max-width: 1280px; */
+  /* Pode ser útil, mas pode ser controlado por classes como max-w-7xl */
+  /* margin: 0 auto; */
+  /* mx-auto no Tailwind */
+  /* padding: 2rem; */
+  /* p-8 no Tailwind */
+  /* text-align: center; */
+  /* text-center no Tailwind */
 }
 
+/* Remova todas essas regras de animação e logo */
+/*
 .logo {
   height: 6em;
   padding: 1.5em;
@@ -40,3 +51,4 @@
 .read-the-docs {
   color: #888;
 }
+*/
