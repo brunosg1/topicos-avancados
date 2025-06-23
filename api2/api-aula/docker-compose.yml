@@ -1,0 +1,103 @@
+services:
+  # API Node.js
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: api-topicos-avancados
+    restart: unless-stopped
+    ports:
+      - "3001:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=api_database
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres123
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - api-network
+    volumes:
+      # Volume para logs (opcional)
+      - ./logs:/app/logs
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:3000/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  # Banco de dados PostgreSQL
+  postgres:
+    image: postgres:15-alpine
+    container_name: postgres-topicos-avancados
+    restart: unless-stopped
+    environment:
+      - POSTGRES_DB=api_database
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres123
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      # Opcional: script de inicialização
+      # - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - api-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d api_database"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Redis para cache/sessões
+  redis:
+    image: redis:7-alpine
+    container_name: redis-topicos-avancados
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - api-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Nginx como proxy reverso (opcional)
+  nginx:
+    image: nginx:stable-alpine
+    container_name: nginx-topicos-avancados
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      # Para SSL (opcional)
+      # - ./ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - api
+    networks:
+      - api-network
+
+# Volumes nomeados para persistência de dados
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+
+# Rede personalizada
+networks:
+  api-network:
+    driver: bridge
