@@ -17,7 +17,7 @@ const Sidebar = ({ activeLink }) => {
                     <FaHome /> Logout
                 </Link>
                 <Link
-                    to="/cadastro" 
+                    to="/cadastros" 
                     className={`flex items-center gap-2 text-green-700 hover:font-semibold ${activeLink === '/cadastro' ? 'font-semibold' : ''}`}
                 >
                     <FaHome /> Cadastro

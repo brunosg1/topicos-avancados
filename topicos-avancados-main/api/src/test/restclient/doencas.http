@@ -5,6 +5,7 @@
 ###Criar uma doenca
 POST {{URL}}
 Content-Type: application/json
+Authorization: Bearer {{token}}
 
 {
     "nome": "",

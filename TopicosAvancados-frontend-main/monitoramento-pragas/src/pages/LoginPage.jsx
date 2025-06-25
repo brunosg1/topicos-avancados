@@ -27,10 +27,18 @@ const LoginPage = () => {
     setError('');
 
     try {
+
+      console.log("tentando logar no serviço...");
+      console.log("username:", formData.username);
+      console.log("password:", formData.password);
+
+
       const response = await Login({
         username: formData.username,
         password: formData.password
       });
+
+
 
       const accessToken = response.data.AuthenticationResult.AccessToken;
 
