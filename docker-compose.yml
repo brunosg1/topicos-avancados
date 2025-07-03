@@ -1,0 +1,75 @@
+version: '3.8'
+
+services:
+  nginx:
+    image: nginx:latest
+    container_name: nginx
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - api1
+      - api2
+      - frontend
+
+  mongodb:
+    image: mongo:latest
+    container_name: mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+
+  postgres:
+    image: postgres:15
+    container_name: postgres
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: mydb
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  api1:
+    build:
+      context: ./topicos-avancados-main/api
+      dockerfile: Dockerfile
+    container_name: api1
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/mydb
+      SPRING_DATASOURCE_USERNAME: user
+      SPRING_DATASOURCE_PASSWORD: password
+    depends_on:
+      - postgres
+    ports:
+      - "8080:8080"
+
+  api2:
+    build:
+      context: ./api2/api-aula
+      dockerfile: Dockerfile
+    container_name: api2
+    environment:
+      MONGO_URL: mongodb://mongodb:27017/mydb
+    depends_on:
+      - mongodb
+    ports:
+      - "3001:3001"
+
+  frontend:
+    build:
+      context: ./TopicosAvancados-frontend-main/monitoramento-pragas
+      dockerfile: Dockerfile
+    container_name: frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - api1
+      - api2
+
+volumes:
+  mongo_data:
+  postgres_data:
